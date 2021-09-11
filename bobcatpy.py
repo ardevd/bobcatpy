@@ -24,10 +24,10 @@ class Bobcat:
         """
         self.miner_ip = miner_ip
 
-        if self._assert_connectivity() != 0:
+        if self.ping() != 0:
             print("[-] Miner not responding or not connected to the network")
 
-    def _assert_connectivity(self):
+    def ping(self):
         # Verify connectivity
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         return sock.connect_ex((self.miner_ip, 80))
@@ -58,7 +58,7 @@ class Bobcat:
 
     def _do_diagnose(self):
         print("[*] Checking connectivity")
-        if self._assert_connectivity() == 0:
+        if self.ping() == 0:
             print("[+] Local Network: OK")
         else:
             print("[-] Local Network: [FAIL] Hotspot does not respond to requests")

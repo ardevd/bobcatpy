@@ -6,7 +6,7 @@ from urllib.request import Request, build_opener
 
 import json
 import logging
-import os
+import time
 import socket
 
 logger = logging.getLogger('bobcatpy')
@@ -24,12 +24,14 @@ class Bobcat:
         """
         self.miner_ip = miner_ip
 
-        # Verify connectivity
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        result = sock.connect_ex((miner_ip, 80))
-        if result != 0:
+        if self._assert_connectivity() != 0:
             print("[-] Miner not responding or not connected to the network")
 
+    def _assert_connectivity(self):
+        # Verify connectivity
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        return sock.connect_ex((self.miner_ip, 80))
+        
     def temps(self):
         return self._get("temp.json")
 
@@ -48,6 +50,67 @@ class Bobcat:
 
     def reset(self):
         return self._post("admin/reset", "The hotspot sync data and Helium software will be reset", self.admin_auth_header)
+
+    def diagnose(self):
+        answer = input("A series of requests will be sent to your miner. This will take some time and slow down your miner.\nContinue (y/n)?")
+        if answer.lower() in ["y", "yes"]:
+            self._do_diagnose()
+
+    def _do_diagnose(self):
+        print("[*] Checking connectivity")
+        if self._assert_connectivity() == 0:
+            print("[+] Local Network: OK")
+        else:
+            print("[-] Local Network: [FAIL] Hotspot does not respond to requests")
+            return
+
+        print("[*] Checking temperatures")
+        self._assert_temperatures(self.temps())
+        time.sleep(3)
+        print("[*] Checking sync state")
+        self._assert_sync_state(self.sync_status())
+        time.sleep(3)
+        print("[*] Checking miner state")
+        time.sleep(3)
+        self._assert_miner_state(self.miner_status())
+        print("[+] Diagnostics complete")
+        
+    def _assert_temperatures(self, temp_data):
+        temp0 = int(temp_data["temp0"])
+        temp1 = int(temp_data["temp1"])
+        
+        if temp0 > 70 or temp1 > 70:
+            print(f"[-] Temperature: [WARN] Onboard temperature is high {temp0}/{temp1}c")
+        else:
+            print("[+] Temperature: OK")
+
+    def _assert_sync_state(self, sync_data):
+        sync_gap = sync_data["gap"]
+        sync_eval = "[+]"
+        sync_eval_message = "OK"
+        if sync_gap.isnumeric():
+            if int(sync_gap) > 800:
+                sync_eval_message = "[WARN] Large sync gap. Fast sync recommended"
+                sync_eval = "[-]"
+        else:
+            sync_eval_message = "[FAIL] Unexpected sync state. Miner software might not be running"
+            sync_eval = "[-]"
+        
+        print(f"{sync_eval} Sync State: {sync_eval_message}")
+
+    def _assert_miner_state(self, miner_status):
+        state = miner_status["miner"]["State"]
+        if state == "running":
+            print("[+] Miner State: Miner running")
+        else:
+            print("[-] Miner State: [FAIL] Miner not running")
+        
+        errors = miner_status["errors"]
+        if errors:
+            print(f"[-] Miner State: [WARN] Miner reports error: {errors}")
+        else:
+            print(f"[+] Miner State: No errors reported")
+
 
     def _post(self, url, message, headers=None):
         answer = input(f"{message}\nContinue (y/n)?")

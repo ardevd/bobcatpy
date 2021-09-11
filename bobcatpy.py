@@ -40,17 +40,22 @@ class Bobcat:
         return self._get("miner.json")
     
     def reboot(self):
-        return self._post("admin/reboot", self.admin_auth_header)
+        return self._post("admin/reboot", "The hotspot will reboot", self.admin_auth_header)
 
     def fast_sync(self):
-        return self._post("admin/fastsync", self.admin_auth_header)
+        return self._post("admin/fastsync", "The hotspot will download and load the latest snapshot. This will take a while and cause the miner to reboot",
+        self.admin_auth_header)
 
     def reset(self):
-        return self._post("admin/reset", self.admin_auth_header)
+        return self._post("admin/reset", "The hotspot sync data and Helium software will be reset", self.admin_auth_header)
 
-    def _post(self, url, headers=None):
-        req = Request("http://%s/%s" %(self.miner_ip, url), headers=headers, method="POST")
-        return self.__open(req)
+    def _post(self, url, message, headers=None):
+        answer = input(f"{message}\nContinue (y/n)?")
+        if answer.lower() in ["y","yes"]:
+            req = Request(f"http://{self.miner_ip}/{url}", headers=headers, method="POST")
+            return self.__open(req)
+        else:
+            pass  
 
     def _get(self, url):
         req = Request("http://%s/%s" %(self.miner_ip, url))

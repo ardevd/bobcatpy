@@ -52,7 +52,7 @@ class Bobcat:
         return self._post("admin/reset", "The hotspot sync data and Helium software will be reset", self.admin_auth_header)
 
     def diagnose(self):
-        answer = input("A series of requests will be sent to your miner. This will take some time and slow down your miner.\nContinue (y/n)?")
+        answer = input("A series of requests will be sent to your miner. This will take some time and slow down your miner.\nContinue (y/n)? ")
         if answer.lower() in ["y", "yes"]:
             self._do_diagnose()
 
@@ -113,7 +113,7 @@ class Bobcat:
 
 
     def _post(self, url, message, headers=None):
-        answer = input(f"{message}\nContinue (y/n)?")
+        answer = input(f"{message}\nContinue (y/n)? ")
         if answer.lower() in ["y","yes"]:
             req = Request(f"http://{self.miner_ip}/{url}", headers=headers, method="POST")
             return self.__open(req)

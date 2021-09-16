@@ -127,7 +127,7 @@ class Bobcat:
             pass
 
     def _get(self, url):
-        req = Request("http://%s/%s" % (self.miner_ip, url))
+        req = Request(f"http://{self.miner_ip}/{url}")
         return self.__open(req)
 
     def __open(self, req):

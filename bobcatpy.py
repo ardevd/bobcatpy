@@ -31,16 +31,16 @@ class Bobcat:
         # Verify connectivity
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         return sock.connect_ex((self.miner_ip, 80))
-        
+
     def temps(self):
         return self._get("temp.json")
 
     def sync_status(self):
         return self._get("status.json")
-        
+
     def miner_status(self):
         return self._get("miner.json")
-    
+
     def reboot(self):
         return self._post("admin/reboot", "The hotspot will reboot", self.admin_auth_header)
 
@@ -50,6 +50,9 @@ class Bobcat:
 
     def reset(self):
         return self._post("admin/reset", "The hotspot sync data and Helium software will be reset", self.admin_auth_header)
+
+    def resync(self):
+        return self._post("admin/resync", "The hotspot will delete local sync data and restart sync", self.admin_auth_header)
 
     def diagnose(self):
         answer = input("A series of requests will be sent to your miner. This will take some time and slow down your miner.\nContinue (y/n)? ")
@@ -74,11 +77,11 @@ class Bobcat:
         time.sleep(3)
         self._assert_miner_state(self.miner_status())
         print("[+] Diagnostics complete")
-        
+
     def _assert_temperatures(self, temp_data):
         temp0 = int(temp_data["temp0"])
         temp1 = int(temp_data["temp1"])
-        
+
         if temp0 > 70 or temp1 > 70:
             print(f"[-] Temperature: [WARN] Onboard temperature is high {temp0}/{temp1}c")
         else:
@@ -95,7 +98,7 @@ class Bobcat:
         else:
             sync_eval_message = "[FAIL] Unexpected sync state. Miner software might not be running"
             sync_eval = "[-]"
-        
+
         print(f"{sync_eval} Sync State: {sync_eval_message}")
 
     def _assert_miner_state(self, miner_status):
@@ -104,7 +107,7 @@ class Bobcat:
             print("[+] Miner State: Miner running")
         else:
             print("[-] Miner State: [FAIL] Miner not running")
-        
+
         errors = miner_status["errors"]
         if errors:
             print(f"[-] Miner State: [WARN] Miner reports error: {errors}")
@@ -118,7 +121,7 @@ class Bobcat:
             req = Request(f"http://{self.miner_ip}/{url}", headers=headers, method="POST")
             return self.__open(req)
         else:
-            pass  
+            pass
 
     def _get(self, url):
         req = Request("http://%s/%s" %(self.miner_ip, url))
@@ -129,7 +132,7 @@ class Bobcat:
         resp = opener.open(req)
         charset = resp.info().get('charset', 'utf-8')
         resp_data = resp.read().decode(charset)
-        
+
         if resp_data:
             try:
                 return json.loads(resp_data)

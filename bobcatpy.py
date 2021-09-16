@@ -11,6 +11,7 @@ import socket
 
 logger = logging.getLogger('bobcatpy')
 
+
 class Bobcat:
     """Bobcat connection class"""
 
@@ -46,7 +47,7 @@ class Bobcat:
 
     def fast_sync(self):
         return self._post("admin/fastsync", "The hotspot will download and load the latest snapshot. This will take a while and cause the miner to reboot",
-        self.admin_auth_header)
+                          self.admin_auth_header)
 
     def reset(self):
         return self._post("admin/reset", "The hotspot sync data and Helium software will be reset", self.admin_auth_header)
@@ -55,7 +56,8 @@ class Bobcat:
         return self._post("admin/resync", "The hotspot will delete local sync data and restart sync", self.admin_auth_header)
 
     def diagnose(self):
-        answer = input("A series of requests will be sent to your miner. This will take some time and slow down your miner.\nContinue (y/n)? ")
+        answer = input(
+            "A series of requests will be sent to your miner. This will take some time and slow down your miner.\nContinue (y/n)? ")
         if answer.lower() in ["y", "yes"]:
             self._do_diagnose()
 
@@ -83,7 +85,8 @@ class Bobcat:
         temp1 = int(temp_data["temp1"])
 
         if temp0 > 70 or temp1 > 70:
-            print(f"[-] Temperature: [WARN] Onboard temperature is high {temp0}/{temp1}c")
+            print(
+                f"[-] Temperature: [WARN] Onboard temperature is high {temp0}/{temp1}c")
         else:
             print("[+] Temperature: OK")
 
@@ -114,17 +117,17 @@ class Bobcat:
         else:
             print(f"[+] Miner State: No errors reported")
 
-
     def _post(self, url, message, headers=None):
         answer = input(f"{message}\nContinue (y/n)? ")
-        if answer.lower() in ["y","yes"]:
-            req = Request(f"http://{self.miner_ip}/{url}", headers=headers, method="POST")
+        if answer.lower() in ["y", "yes"]:
+            req = Request(f"http://{self.miner_ip}/{url}",
+                          headers=headers, method="POST")
             return self.__open(req)
         else:
             pass
 
     def _get(self, url):
-        req = Request("http://%s/%s" %(self.miner_ip, url))
+        req = Request("http://%s/%s" % (self.miner_ip, url))
         return self.__open(req)
 
     def __open(self, req):

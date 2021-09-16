@@ -23,6 +23,9 @@ b.reboot()
 # Fastsync the hotspot
 b.fastsync()
 
+# Resync the hotspot
+b.resync()
+
 # Reset the hotspot
 b.reset()
 

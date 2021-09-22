@@ -34,28 +34,36 @@ class Bobcat:
         return sock.connect_ex((self.miner_ip, 80))
 
     def temps(self):
+        """Retrieve temperature information from the miner"""
         return self._get("temp.json")
 
     def sync_status(self):
+        """Get the blockchain synchronization channel"""
         return self._get("status.json")
 
     def miner_status(self):
+        """Get the miner status"""
         return self._get("miner.json")
 
     def reboot(self):
+        """Reboot the hotspot"""
         return self._post("admin/reboot", "The hotspot will reboot", self.admin_auth_header)
 
     def fast_sync(self):
+        """Download and load the latest blockchain snapshot"""
         return self._post("admin/fastsync", "The hotspot will download and load the latest snapshot. This will take a while and cause the miner to reboot",
                           self.admin_auth_header)
 
     def reset(self):
+        """Reset the hotspot"""
         return self._post("admin/reset", "The hotspot sync data and Helium software will be reset", self.admin_auth_header)
 
     def resync(self):
+        """Resync the hotspot"""
         return self._post("admin/resync", "The hotspot will delete local sync data and restart sync", self.admin_auth_header)
 
     def diagnose(self):
+        """Diagnose the hotspot by running a series of checks"""
         answer = input(
             "A series of requests will be sent to your miner. This will take some time and slow down your miner.\nContinue (y/n)? ")
         if answer.lower() in ["y", "yes"]:

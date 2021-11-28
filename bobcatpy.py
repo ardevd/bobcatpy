@@ -43,7 +43,7 @@ class Bobcat:
 
     def miner_status(self):
         """Get the miner status"""
-        return self._get("miner.json")
+        return  self._get("miner.json")
 
     def reboot(self):
         """Reboot the hotspot"""
@@ -146,7 +146,7 @@ class Bobcat:
 
         if resp_data:
             try:
-                return json.loads(resp_data)
+                return json.dumps(json.loads(resp_data), ident=2)
             except json.JSONDecodeError:
                 return resp_data
         else:

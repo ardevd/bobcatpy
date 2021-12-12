@@ -146,7 +146,7 @@ class Bobcat:
 
         if resp_data:
             try:
-                return json.dumps(json.loads(resp_data), indent=2)
+                return json.loads(resp_data)
             except json.JSONDecodeError:
                 return resp_data
         else:

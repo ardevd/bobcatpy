@@ -4,6 +4,16 @@ A Python library to interact with the Bobcat Helium miner diagnostics API.
 
 BobcatPy provides an alternative way to interact with the Bobcat diagnoser interface and includes some additional functionality for easy troubleshooting and maintenance.
 
+
+## Installation
+
+`bobcatpy` is available through PyPi.
+
+```
+pip install bobcatpy
+```
+
+
 ## Usage
 
 ```python

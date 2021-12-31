@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="bobcatpy",
-    version="1.0.0",
+    version="1.0.1",
     author="ardevd",
     author_email="5gk633atf@relay.firefox.com",
     description="Control and monitor your Bobcat miner",

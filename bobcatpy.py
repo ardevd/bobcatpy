@@ -57,7 +57,7 @@ class Bobcat:
         summary['public_ip'] = miner_status['public_ip']
         summary['private_ip'] = miner_status['private_ip']
         summary['temp'] = miner_status['temp0']
-        summary['sync_gap'] = summary['blockchain_height'] - summary['miner_height']
+        summary['sync_gap'] = max(0, summary['blockchain_height'] - summary['miner_height'])
         return summary
 
     def blockchain_height(self):

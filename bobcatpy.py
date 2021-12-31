@@ -45,6 +45,26 @@ class Bobcat:
         """Get the miner status"""
         return  self._get("miner.json")
 
+    def status_summary(self):
+        """Get a condenser summary of the miner status"""
+        miner_status = self.miner_status()
+        summary = {}
+        summary['ota_version'] = miner_status['ota_version']
+        summary['animal'] = miner_status['animal']
+        summary['state'] = miner_status['miner']['State']
+        summary['miner_height'] = int(miner_status['miner_height'])
+        summary['blockchain_height'] = self.blockchain_height()
+        summary['public_ip'] = miner_status['public_ip']
+        summary['private_ip'] = miner_status['private_ip']
+        summary['temp'] = miner_status['temp0']
+        summary['sync_gap'] = summary['blockchain_height'] - summary['miner_height']
+        return summary
+
+    def blockchain_height(self):
+        req = Request(f"https://api.helium.io/v1/blocks/height")
+        height = self.__open(req)
+        return height['data']['height']
+
     def reboot(self):
         """Reboot the hotspot"""
         return self._post("admin/reboot", "The hotspot will reboot", self.admin_auth_header)

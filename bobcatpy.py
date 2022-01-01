@@ -8,6 +8,7 @@ import json
 import logging
 import time
 import socket
+import re
 
 logger = logging.getLogger('bobcatpy')
 
@@ -56,11 +57,16 @@ class Bobcat:
         summary['blockchain_height'] = self.blockchain_height()
         summary['public_ip'] = miner_status['public_ip']
         summary['private_ip'] = miner_status['private_ip']
-        summary['temp'] = miner_status['temp0']
+        summary['temp'] = self._parse_temperature(miner_status['temp0'])
         summary['sync_gap'] = max(0, summary['blockchain_height'] - summary['miner_height'])
         return summary
 
+    def _parse_temperature(self, temperature_string):
+        """Parse the temperature value from temperature value string"""
+        return re.findall("\d+", temperature_string)[0]
+
     def blockchain_height(self):
+        """Return the current Helium blockchain height"""
         req = Request(f"https://api.helium.io/v1/blocks/height")
         height = self.__open(req)
         return height['data']['height']

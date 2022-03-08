@@ -19,13 +19,15 @@ class Bobcat:
     admin_auth_header = {"Authorization": "Basic Ym9iY2F0Om1pbmVy"}
 
     def __init__(self,
-                 miner_ip=''):
+                 miner_ip='',
+                 get_timeout=5,
+                 ):
         """Init the Bobcat object
 
         The miner IP should be the local IP assigned to the bobcat hotspot
         """
         self.miner_ip = miner_ip
-
+        self.get_timeout = get_timeout
         if self.ping() != 0:
             print("[-] Miner not responding or not connected to the network")
 
@@ -163,14 +165,18 @@ class Bobcat:
 
     def _get(self, url):
         req = Request(f"http://{self.miner_ip}/{url}")
-        return self.__open(req)
+        return self.__open(req, timeout=self.get_timeout)
 
-    def __open(self, req):
+    def __open(self, req, timeout=None):
         opener = build_opener()
-        resp = opener.open(req)
-        charset = resp.info().get('charset', 'utf-8')
-        resp_data = resp.read().decode(charset)
-
+        resp_data = None
+        try:
+            resp = opener.open(req, timeout=timeout)
+            charset = resp.info().get('charset', 'utf-8')
+            resp_data = resp.read().decode(charset)
+        except socket.timeout:
+            import warnings
+            warnings.warn("Caught a socket.timeout")
         if resp_data:
             try:
                 return json.loads(resp_data)

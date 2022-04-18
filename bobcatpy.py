@@ -50,18 +50,22 @@ class Bobcat:
 
     def status_summary(self):
         """Get a condenser summary of the miner status"""
-        miner_status = self.miner_status()
         summary = {}
-        summary['ota_version'] = miner_status['ota_version']
-        summary['image'] = miner_status['miner']['Image']
-        summary['animal'] = miner_status['animal']
-        summary['state'] = miner_status['miner']['State']
-        summary['miner_height'] = int(miner_status['miner_height'])
-        summary['blockchain_height'] = self.blockchain_height()
-        summary['public_ip'] = miner_status['public_ip']
-        summary['private_ip'] = miner_status['private_ip']
-        summary['temp'] = self._parse_temperature(miner_status['temp0'])
-        summary['sync_gap'] = max(0, summary['blockchain_height'] - summary['miner_height'])
+        try: 
+            miner_status = self.miner_status()
+            summary['ota_version'] = miner_status['ota_version']
+            summary['image'] = miner_status['miner']['Image']
+            summary['animal'] = miner_status['animal']
+            summary['state'] = miner_status['miner']['State']
+            summary['miner_height'] = int(miner_status['miner_height'])
+            summary['blockchain_height'] = self.blockchain_height()
+            summary['public_ip'] = miner_status['public_ip']
+            summary['private_ip'] = miner_status['private_ip']
+            summary['temp'] = self._parse_temperature(miner_status['temp0'])
+            summary['sync_gap'] = max(0, summary['blockchain_height'] - summary['miner_height'])
+        except:
+            pass
+        
         return summary
 
     def _parse_temperature(self, temperature_string):

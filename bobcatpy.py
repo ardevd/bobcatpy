@@ -21,6 +21,7 @@ class Bobcat:
     def __init__(self,
                  miner_ip='',
                  get_timeout=5,
+                 auto_connect=True
                  ):
         """Init the Bobcat object
 
@@ -28,7 +29,8 @@ class Bobcat:
         """
         self.miner_ip = miner_ip
         self.get_timeout = get_timeout
-        if self.ping() != 0:
+
+        if auto_connect and self.ping() != 0:
             print("[-] Miner not responding or not connected to the network")
 
     def ping(self):

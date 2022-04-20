@@ -52,7 +52,7 @@ class Bobcat:
         return  self._get("miner.json")
 
     def status_summary(self):
-        """Get a condenser summary of the miner status"""
+        """Get a condensed summary of the miner status"""
         summary = {}
         try:
             miner_status = self.miner_status()

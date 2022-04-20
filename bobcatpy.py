@@ -20,7 +20,7 @@ class Bobcat:
 
     def __init__(self,
                  miner_ip='',
-                 get_timeout=5,
+                 get_timeout=20,
                  auto_connect=True
                  ):
         """Init the Bobcat object

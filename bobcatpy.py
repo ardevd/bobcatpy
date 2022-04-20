@@ -34,7 +34,7 @@ class Bobcat:
             print("[-] Miner not responding or not connected to the network")
 
     def ping(self):
-        # Verify connectivity
+        """Verify connectivity"""
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         return sock.connect_ex((self.miner_ip, 80))
 
@@ -76,7 +76,7 @@ class Bobcat:
 
     def blockchain_height(self):
         """Return the current Helium blockchain height"""
-        req = Request(f"https://api.helium.io/v1/blocks/height")
+        req = Request("https://api.helium.io/v1/blocks/height")
         height = self.__open(req)
         return height['data']['height']
 

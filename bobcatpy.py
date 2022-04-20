@@ -67,7 +67,7 @@ class Bobcat:
             summary['temp'] = self._parse_temperature(miner_status['temp0'])
             summary['sync_gap'] = max(0, summary['blockchain_height'] - summary['miner_height'])
         except Exception:
-            pass
+            summary['state'] = "unavailable"
         
         return summary
 

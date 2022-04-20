@@ -32,7 +32,7 @@ class Bobcat:
         self.get_timeout = get_timeout
 
         if auto_connect and self.ping() != 0:
-            print("[-] Miner not responding or not connected to the network")
+            logger.warning("[-] Miner not responding or not connected to the network")
 
     def ping(self):
         """Verify connectivity"""

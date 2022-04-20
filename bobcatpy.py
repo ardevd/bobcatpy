@@ -9,6 +9,7 @@ import logging
 import time
 import socket
 import re
+import warnings
 
 logger = logging.getLogger('bobcatpy')
 
@@ -72,7 +73,7 @@ class Bobcat:
 
     def _parse_temperature(self, temperature_string):
         """Parse the temperature value from temperature value string"""
-        return re.findall("\d+", temperature_string)[0]
+        return re.findall(r"\d+", temperature_string)[0]
 
     def blockchain_height(self):
         """Return the current Helium blockchain height"""
@@ -158,7 +159,7 @@ class Bobcat:
         if errors:
             print(f"[-] Miner State: [WARN] Miner reports error: {errors}")
         else:
-            print(f"[+] Miner State: No errors reported")
+            print("[+] Miner State: No errors reported")
 
     def _post(self, url, message, headers=None):
         answer = input(f"{message}\nContinue (y/n)? ")
@@ -166,8 +167,6 @@ class Bobcat:
             req = Request(f"http://{self.miner_ip}/{url}",
                           headers=headers, method="POST")
             return self.__open(req)
-        else:
-            pass
 
     def _get(self, url):
         req = Request(f"http://{self.miner_ip}/{url}")
@@ -181,7 +180,6 @@ class Bobcat:
             charset = resp.info().get('charset', 'utf-8')
             resp_data = resp.read().decode(charset)
         except socket.timeout:
-            import warnings
             warnings.warn("Caught a socket.timeout")
         if resp_data:
             try:

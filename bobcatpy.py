@@ -66,6 +66,7 @@ class Bobcat:
             summary['private_ip'] = miner_status['private_ip']
             summary['temp'] = self._parse_temperature(miner_status['temp0'])
             summary['sync_gap'] = max(0, summary['blockchain_height'] - summary['miner_height'])
+            summary['error'] = miner_status['errors'] != ''
         except Exception:
             summary['state'] = "unavailable"
         

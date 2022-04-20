@@ -54,7 +54,7 @@ class Bobcat:
     def status_summary(self):
         """Get a condenser summary of the miner status"""
         summary = {}
-        try: 
+        try:
             miner_status = self.miner_status()
             summary['ota_version'] = miner_status['ota_version']
             summary['image'] = miner_status['miner']['Image']
@@ -66,7 +66,7 @@ class Bobcat:
             summary['private_ip'] = miner_status['private_ip']
             summary['temp'] = self._parse_temperature(miner_status['temp0'])
             summary['sync_gap'] = max(0, summary['blockchain_height'] - summary['miner_height'])
-        except:
+        except Exception:
             pass
         
         return summary

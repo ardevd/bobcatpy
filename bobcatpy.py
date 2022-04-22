@@ -11,6 +11,8 @@ import socket
 import re
 import warnings
 
+from datetime import datetime, timezone
+
 logger = logging.getLogger('bobcatpy')
 
 
@@ -54,23 +56,37 @@ class Bobcat:
     def status_summary(self):
         """Get a condensed summary of the miner status"""
         summary = {}
+
+        summary['state'] = "unavailable"
+
         try:
             miner_status = self.miner_status()
-            summary['ota_version'] = miner_status['ota_version']
-            summary['image'] = miner_status['miner']['Image']
-            summary['animal'] = miner_status['animal']
-            summary['state'] = miner_status['miner']['State']
-            summary['miner_height'] = int(miner_status['miner_height'])
-            summary['blockchain_height'] = self.blockchain_height()
-            summary['public_ip'] = miner_status['public_ip']
-            summary['private_ip'] = miner_status['private_ip']
-            summary['temp'] = self._parse_temperature(miner_status['temp0'])
-            summary['sync_gap'] = max(0, summary['blockchain_height'] - summary['miner_height'])
-            summary['error'] = miner_status['errors'] != ''
-        except Exception:
-            summary['state'] = "unavailable"
-        
+
+            if miner_status:
+                summary['ota_version'] = miner_status['ota_version']
+                summary['image'] = miner_status['miner']['Image']
+                summary['image_version'] = summary['image'].split(':', 1)[1] if ':' in summary['image'] else None
+                summary['animal'] = miner_status['animal']
+                summary['state'] = miner_status['miner']['State']
+                summary['created'] = self._parse_created(miner_status['miner']['Created'])
+                summary['miner_height'] = int(miner_status['miner_height'])
+                summary['blockchain_height'] = self.blockchain_height()
+                summary['public_ip'] = miner_status['public_ip']
+                summary['private_ip'] = miner_status['private_ip']
+                summary['temp'] = self._parse_temperature(miner_status['temp0'])
+                summary['sync_gap'] = max(0, summary['blockchain_height'] - summary['miner_height'])
+                summary['error'] = miner_status['errors'] != ''
+        except Exception as ex:
+            logger.error('Exception during status update: %s', ex)
+
         return summary
+
+    def _parse_created(self, created):
+        """Convert miner created epoch timestamp to python datetime object"""
+        if created:
+            return datetime.fromtimestamp(created, tz=timezone.utc)
+
+        return None
 
     def _parse_temperature(self, temperature_string):
         """Parse the temperature value from temperature value string"""

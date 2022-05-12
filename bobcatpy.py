@@ -61,7 +61,7 @@ class Bobcat:
 
         try:
             miner_status = self.miner_status()
-
+            
             if miner_status:
                 summary['ota_version'] = miner_status['ota_version']
                 summary['image'] = miner_status['miner']['Image']
@@ -70,14 +70,19 @@ class Bobcat:
                 summary['state'] = miner_status['miner']['State']
                 summary['created'] = miner_status['miner']['Created']
                 summary['miner_height'] = int(miner_status['miner_height'])
-                summary['blockchain_height'] = self.blockchain_height()
                 summary['public_ip'] = miner_status['public_ip']
                 summary['private_ip'] = miner_status['private_ip']
                 summary['temp'] = self._parse_temperature(miner_status['temp0'])
                 summary['sync_gap'] = max(0, summary['blockchain_height'] - summary['miner_height'])
                 summary['error'] = miner_status['errors'] != ''
+
         except Exception as ex:
             logger.error('Exception during status update: %s', ex)
+
+        try:
+            summary['blockchain_height'] = self.blockchain_height()
+        except Exception as ex:
+            logger.error('Exception during blockchain height check: %s', ex)
 
         return summary
 

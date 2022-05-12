@@ -7,6 +7,9 @@ jobs:
     steps:
     - uses: actions/checkout@master
     - name: SonarQube Scan
+      on:
+        pull_requests
+        branches
       uses: kitabisa/sonarqube-action@v1.1.1
       with:
         host: ${{ secrets.SONARQUBE_HOST }}

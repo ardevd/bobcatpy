@@ -1,12 +1,14 @@
 on: push
-name: Main Workflow
+name: Sonarqube Analysis
+on:
+  push:
+    branches:    
+      - 'master'
+  pull_request:
 jobs:
   sonarQubeTrigger:
     name: SonarQube Trigger
     runs-on: ubuntu-latest
-    on:
-      pull_requests
-      branches
     steps:
     - uses: actions/checkout@master
     - name: SonarQube Scan

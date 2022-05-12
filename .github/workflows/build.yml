@@ -1,9 +1,8 @@
-on: push
 name: Sonarqube Analysis
 on:
   push:
     branches:    
-      - 'master'
+      - 'main'
   pull_request:
 jobs:
   sonarQubeTrigger:

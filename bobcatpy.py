@@ -6,12 +6,9 @@ from urllib.request import Request, build_opener
 
 import json
 import logging
-import time
 import socket
 import re
 import warnings
-
-from datetime import datetime, timezone
 
 logger = logging.getLogger('bobcatpy')
 

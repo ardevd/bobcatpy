@@ -16,11 +16,14 @@ pip install bobcatpy
 ## Usage
 
 ```python
-import bobcatpy
+from bobcatpy import Bobcat
+import asyncio
 
 async def main():
     b = Bobcat("10.10.21.70")
     temps = await b.temps()
     print(temps)
     await b.close_session()
+
+asyncio.run(main())
 ```

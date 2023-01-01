@@ -1,8 +1,8 @@
 # bobcatpy
 
-A Python library to interact with the Bobcat Helium miner diagnostics API.
+An asyncio based Python library to interact with the Bobcat Helium miner diagnostics API.
 
-`bobcatpy` provides an alternative way to interact with the Bobcat diagnoser interface and includes some additional functionality for easy troubleshooting and maintenance.
+`bobcatpy` provides an alternative way to interact with the Bobcat diagnoser interface.
 
 
 ## Installation
@@ -18,16 +18,9 @@ pip install bobcatpy
 ```python
 import bobcatpy
 
-# Define your Bobcat instance. Replace with your actual hotspot IP
-b = Bobcat("192.168.1.150")
-
-# Get statuses
-b.temps()
-b.miner_status()
-
-# Reboot the hotspot
-b.reboot()
-
-# Reset the hotspot
-b.reset()
+async def main():
+    b = Bobcat("10.10.21.70")
+    temps = await b.temps()
+    print(temps)
+    await b.close_session()
 ```

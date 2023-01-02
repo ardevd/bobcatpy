@@ -45,7 +45,7 @@ class Bobcat:
 
     async def reset(self):
         """Reset the miner"""
-        return await self._post("admin/reset", self.admin_auth_header)
+        return await self._post("admin/reset", const.ADMIN_AUTH_HEADER)
     
     async def _get(self, uri):
         """Generic GET request helper function"""

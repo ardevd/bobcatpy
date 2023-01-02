@@ -12,7 +12,7 @@ import const
 logger = logging.getLogger('bobcatpy')
 
 class Bobcat:
-    """Bobcat connection class"""    
+    """Bobcat connection class"""
 
     base_url = ""
 

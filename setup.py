@@ -14,7 +14,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/ardevd/bobcatpy",
     py_modules=['bobcatpy'],
-    install_requires=[],
+    install_requires=["aiohttp"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

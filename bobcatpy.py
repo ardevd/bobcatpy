@@ -7,7 +7,7 @@ import logging
 
 import aiohttp
 
-import const
+ADMIN_AUTH_HEADER = {"Authorization": "Basic Ym9iY2F0Om1pbmVy"}
 
 logger = logging.getLogger('bobcatpy')
 
@@ -41,11 +41,11 @@ class Bobcat:
 
     async def reboot(self):
         """Reboot the miner"""
-        return await self._post("admin/reboot", const.ADMIN_AUTH_HEADER)
+        return await self._post("admin/reboot", ADMIN_AUTH_HEADER)
 
     async def reset(self):
         """Reset the miner"""
-        return await self._post("admin/reset", const.ADMIN_AUTH_HEADER)
+        return await self._post("admin/reset", ADMIN_AUTH_HEADER)
     
     async def _get(self, uri):
         """Generic GET request helper function"""

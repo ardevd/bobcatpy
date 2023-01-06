@@ -20,7 +20,7 @@ from bobcatpy import Bobcat
 import asyncio
 
 async def main():
-    b = Bobcat("10.10.21.71")
+    b = Bobcat("192.168.1.100")
   
     status = await b.status_summary()
     print(status)

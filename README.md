@@ -20,9 +20,10 @@ from bobcatpy import Bobcat
 import asyncio
 
 async def main():
-    b = Bobcat("10.10.21.70")
-    temps = await b.temps()
-    print(temps)
+    b = Bobcat("10.10.21.71")
+  
+    status = await b.status_summary()
+    print(status)
     await b.close_session()
 
 asyncio.run(main())

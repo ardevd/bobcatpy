@@ -4,7 +4,6 @@ https://github.com/ardevd/bobcatpy
 
 import re
 import logging
-import asyncio
 import json
 
 import aiohttp
@@ -95,13 +94,6 @@ class Bobcat:
         """Parse the temperature value from temperature value string"""
         return re.findall(r"\d+", temperature_string)[0]
 
-    async def blockchain_height(self):
-        """Return the current Helium blockchain height"""
-        url = "https://api.helium.io/v1/blocks/height"
-        async with self.session.get(url) as resp:
-            response_json = await resp.json()
-            return response_json['data']['height']
-
     async def status_summary(self):
         """Get a condensed summary of the miner status"""
         summary = {}
@@ -109,15 +101,8 @@ class Bobcat:
         summary['state'] = "unavailable"
 
         try:
-            # Schedule tasks (results will correlate with scheduling order)
-            tasks = []
-            tasks.append(asyncio.ensure_future(self.miner_status()))
-            tasks.append(asyncio.ensure_future(self.blockchain_height()))
-
-            # Gather task results
-            response_data = await asyncio.gather(*tasks)
-            miner_status = response_data[0]
-            blockchain_height = response_data[1]
+            # Get miner status
+            miner_status = await self.miner_status()
 
             # To avoid rate limiting, we must retrieve led status sequentially
             miner_led = await self.led()
@@ -125,20 +110,19 @@ class Bobcat:
             if miner_led:
                 summary['led'] = miner_led["led"]
 
-            summary['blockchain_height'] = blockchain_height
-
-            summary['ota_version'] = miner_status['ota_version']
-            summary['image'] = miner_status['miner']['Image']
-            summary['image_version'] = summary['image'].split(
-                ':', 1)[1] if ':' in summary['image'] else None
-            summary['animal'] = miner_status['animal']
-            summary['state'] = miner_status['miner']['State']
-            summary['created'] = miner_status['miner']['Created']
-            summary['public_ip'] = miner_status['public_ip']
-            summary['private_ip'] = miner_status['private_ip']
-            summary['temp'] = self._parse_temperature(
-                miner_status['temp0'])
-            summary['error'] = miner_status['errors'] != ''
+            if miner_status:
+                summary['ota_version'] = miner_status['ota_version']
+                summary['image'] = miner_status['miner']['Image']
+                summary['image_version'] = summary['image'].split(
+                    ':', 1)[1] if ':' in summary['image'] else None
+                summary['animal'] = miner_status['animal']
+                summary['state'] = miner_status['miner']['State']
+                summary['created'] = miner_status['miner']['Created']
+                summary['public_ip'] = miner_status['public_ip']
+                summary['private_ip'] = miner_status['private_ip']
+                summary['temp'] = self._parse_temperature(
+                    miner_status['temp0'])
+                summary['error'] = miner_status['errors'] != ''
 
         except aiohttp.ClientError as ex:
             logger.error("Failed to connect to host %s", self.miner_ip)

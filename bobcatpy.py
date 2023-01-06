@@ -7,6 +7,7 @@ import logging
 
 import aiohttp
 import asyncio
+import json
 
 ADMIN_AUTH_HEADER = {"Authorization": "Basic Ym9iY2F0Om1pbmVy"}
 
@@ -37,6 +38,10 @@ class Bobcat:
         """Get miner temperatures"""
         return await self._get("temp.json")
 
+    async def led(self):
+        """Get miner led color"""
+        return await self._get("led.json")
+
     async def dig(self):
         """Dig helium seed nodes"""
         return await self._get("dig.json")
@@ -53,7 +58,28 @@ class Bobcat:
         """Generic GET request helper function"""
         url = f'{self.base_url}{uri}'
         async with self.session.get(url) as resp:
-            return await resp.json()
+            status = resp.status
+
+            # Check for Bobcat rate limiting
+            if status == 429:
+                raise BobcatRateLimitException(
+                    "Rate limit exceeded, try again later")
+
+            if status == 200:
+                # The Bobcat diagnoser API doesnt always properly declare json responses with correct content type
+                try:
+                    return await resp.json()
+                except aiohttp.ContentTypeError:
+                    try:
+                        # try to cast txt as json
+                        return json.loads(await resp.text())
+                    except aiohttp.ContentTypeError:
+                        # Give up
+                        pass
+
+                return None
+
+            return None
 
     async def _post(self, uri: str, headers=None):
         """Generic POST request helper function"""
@@ -93,28 +119,26 @@ class Bobcat:
             miner_status = response_data[0]
             blockchain_height = response_data[1]
 
-            if blockchain_height:
-                summary['blockchain_height'] = blockchain_height
-            if miner_status:
-                # Check if we get the rate limit exception
-                if "message" in miner_status.keys():
-                    if miner_status["message"] == "rate limit exceeded":
-                        # Rate limit exceeded
-                        raise BobcatRateLimitException(
-                            "Rate limit exceeded, try again later")
+            # To avoid rate limiting, we must retrieve led status sequentially
+            miner_led = await self.led()
 
-                summary['ota_version'] = miner_status['ota_version']
-                summary['image'] = miner_status['miner']['Image']
-                summary['image_version'] = summary['image'].split(
-                    ':', 1)[1] if ':' in summary['image'] else None
-                summary['animal'] = miner_status['animal']
-                summary['state'] = miner_status['miner']['State']
-                summary['created'] = miner_status['miner']['Created']
-                summary['public_ip'] = miner_status['public_ip']
-                summary['private_ip'] = miner_status['private_ip']
-                summary['temp'] = self._parse_temperature(
-                    miner_status['temp0'])
-                summary['error'] = miner_status['errors'] != ''
+            if miner_led:
+                summary['led'] = miner_led["led"]
+
+            summary['blockchain_height'] = blockchain_height
+
+            summary['ota_version'] = miner_status['ota_version']
+            summary['image'] = miner_status['miner']['Image']
+            summary['image_version'] = summary['image'].split(
+                ':', 1)[1] if ':' in summary['image'] else None
+            summary['animal'] = miner_status['animal']
+            summary['state'] = miner_status['miner']['State']
+            summary['created'] = miner_status['miner']['Created']
+            summary['public_ip'] = miner_status['public_ip']
+            summary['private_ip'] = miner_status['private_ip']
+            summary['temp'] = self._parse_temperature(
+                miner_status['temp0'])
+            summary['error'] = miner_status['errors'] != ''
 
         except aiohttp.ClientError as ex:
             logger.error("Failed to connect to host %s", self.miner_ip)

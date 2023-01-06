@@ -6,10 +6,12 @@ import re
 import logging
 
 import aiohttp
+import asyncio
 
 ADMIN_AUTH_HEADER = {"Authorization": "Basic Ym9iY2F0Om1pbmVy"}
 
 logger = logging.getLogger('bobcatpy')
+
 
 class Bobcat:
     """Bobcat connection class"""
@@ -46,7 +48,7 @@ class Bobcat:
     async def reset(self):
         """Reset the miner"""
         return await self._post("admin/reset", ADMIN_AUTH_HEADER)
-    
+
     async def _get(self, uri: str):
         """Generic GET request helper function"""
         url = f'{self.base_url}{uri}'
@@ -56,13 +58,13 @@ class Bobcat:
     async def _post(self, uri: str, headers=None):
         """Generic POST request helper function"""
         url = f'{self.base_url}{uri}'
-        async with self.session.post(url, headers = headers) as resp:
+        async with self.session.post(url, headers=headers) as resp:
             return await resp.text()
 
     async def close_session(self):
         """Close the connection session"""
         await self.session.close()
-    
+
     def _parse_temperature(self, temperature_string: str):
         """Parse the temperature value from temperature value string"""
         return re.findall(r"\d+", temperature_string)[0]
@@ -81,40 +83,45 @@ class Bobcat:
         summary['state'] = "unavailable"
 
         try:
-            miner_status = await self.miner_status()
-            
+            # Schedule tasks (results will correlate with scheduling order)
+            tasks = []
+            tasks.append(asyncio.ensure_future(self.miner_status()))
+            tasks.append(asyncio.ensure_future(self.blockchain_height()))
+
+            # Gather task results
+            response_data = await asyncio.gather(*tasks)
+            miner_status = response_data[0]
+            blockchain_height = response_data[1]
+
+            if blockchain_height:
+                summary['blockchain_height'] = blockchain_height
             if miner_status:
                 # Check if we get the rate limit exception
                 if "message" in miner_status.keys():
                     if miner_status["message"] == "rate limit exceeded":
-                    # Rate limit exceeded
-                        raise BobcatRateLimitException("Rate limit exceeded, try again later")
+                        # Rate limit exceeded
+                        raise BobcatRateLimitException(
+                            "Rate limit exceeded, try again later")
 
                 summary['ota_version'] = miner_status['ota_version']
                 summary['image'] = miner_status['miner']['Image']
-                summary['image_version'] = summary['image'].split(':', 1)[1] if ':' in summary['image'] else None
+                summary['image_version'] = summary['image'].split(
+                    ':', 1)[1] if ':' in summary['image'] else None
                 summary['animal'] = miner_status['animal']
                 summary['state'] = miner_status['miner']['State']
                 summary['created'] = miner_status['miner']['Created']
                 summary['public_ip'] = miner_status['public_ip']
                 summary['private_ip'] = miner_status['private_ip']
-                summary['temp'] = self._parse_temperature(miner_status['temp0'])
+                summary['temp'] = self._parse_temperature(
+                    miner_status['temp0'])
                 summary['error'] = miner_status['errors'] != ''
 
         except aiohttp.ClientError as ex:
             logger.error("Failed to connect to host %s", self.miner_ip)
-            raise BobcatConnectionError("Failed to connect to miner. Verify IP and connectivity") from ex
-
-        try:
-            summary['blockchain_height'] = await self.blockchain_height()
-        except aiohttp.ClientError as ex:
-            logger.error("Failed to obtain blockchain height")
             raise ex
 
         return summary
 
+
 class BobcatRateLimitException(Exception):
     """Bobcat Miner rate limit exceeded"""
-
-class BobcatConnectionError(Exception):
-    """Failed to connect to miner"""

@@ -120,8 +120,10 @@ class Bobcat:
                 summary['created'] = miner_status['miner']['Created']
                 summary['public_ip'] = miner_status['public_ip']
                 summary['private_ip'] = miner_status['private_ip']
-                summary['temp'] = self._parse_temperature(
+                summary['temp0'] = self._parse_temperature(
                     miner_status['temp0'])
+                summary['temp1'] = self._parse_temperature(
+                    miner_status['temp1'])
                 summary['error'] = miner_status['errors'] != ''
 
         except aiohttp.ClientError as ex:
